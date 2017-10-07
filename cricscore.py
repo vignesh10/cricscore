@@ -2,6 +2,7 @@ import urllib
 import xml.etree.ElementTree as ET
 import sys
 import json
+from prettytable import PrettyTable
 
 resp_xml = urllib.urlopen('http://www.cricbuzz.com/api/html/matches-menu').read().replace('&nbsp;','')
 
@@ -44,6 +45,39 @@ team_id =  {}
 team_id[str(score['team1']['id'])] = score['team1']['name']
 team_id[str(score['team2']['id'])] = score['team2']['name']
 
-print(team_id[score['score']['batting']['id']] + " " + score['score']['batting']['score'])
+player = {}
+for i in range(len(score['players'])):
+    player[str(score['players'][i]['id'])] = score['players'][i]['f_name']
+
+print('\n\n')
+print('=========================='+team_id[score['score']['batting']['id']] + " " + score['score']['batting']['score']+'==========================')
+score_table = PrettyTable(['Batsman','Runs','Balls','Fours','Sixes','Strike Rate'])
+
+for i in range(2):
+    batsman = player[str(score['score']['batsman'][i]['id'])]
+    if score['score']['batsman'][i]['strike']=='1':
+        batsman += '*'
+    runs = score['score']['batsman'][i]['r']
+    balls = score['score']['batsman'][i]['b']
+    fours = score['score']['batsman'][i]['4s']
+    sixes = score['score']['batsman'][i]['6s']
+    strike_rate = (float(runs)/float(balls))*100.0
+    strike_rate = format(strike_rate,'.2f')
+    score_table.add_row([batsman,runs,balls,fours,sixes,strike_rate])
+
+print score_table   
+
+print('\nBowling')
+bowling_table = PrettyTable(['Bowler','Overs','Maidens','Runs','Wickets'])
+
+for i in range(2):
+    bowler = player[str(score['score']['bowler'][i]['id'])]
+    overs = score['score']['bowler'][i]['o']
+    maidens = score['score']['bowler'][i]['m']
+    runs = score['score']['bowler'][i]['r']
+    wickets = score['score']['bowler'][i]['w']
+    bowling_table.add_row([bowler,overs,maidens,runs,wickets])
+
+print bowling_table
 print(score['status'])
 
